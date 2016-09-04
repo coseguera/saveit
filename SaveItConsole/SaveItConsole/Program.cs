@@ -10,8 +10,8 @@ namespace SaveItConsole
 {
     public class Program
     {
-        private const string entityFileRelativePath = "saveitentities.txt";
-        private const string inputFileRelativePath = "input/rawAug15.csv";
+        private const string entityFileRelativePath = "../saveitdata/saveitentities.txt";
+        private const string inputFileRelativePath = "../saveitdata/input/rawAug15.csv";
 
         public static void Main(string[] args)
         {
