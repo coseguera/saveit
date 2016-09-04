@@ -1,0 +1,18 @@
+{
+  "version": "1.0.0-*",
+  "buildOptions": {
+    "emitEntryPoint": false
+  },
+  "dependencies": {
+    "SaveIt.Common": "1.0.0",
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "*"
+    },
+    "System.Runtime.Serialization.Primitives": "*",
+    "Newtonsoft.Json": "*"
+  },
+  "frameworks": {
+    "netcoreapp1.0": {}
+  }
+}

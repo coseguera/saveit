@@ -1,0 +1,3 @@
+{
+    "projects" : ["SaveIt.Common", "SaveIt.Data", "SaveIt.IO", "SaveItConsole", "SaveIt.Web"]
+}

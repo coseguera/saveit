@@ -1,0 +1,26 @@
+{
+  "version": "1.0.0-*",
+  "buildOptions": {
+    "emitEntryPoint": true
+  },
+
+  "dependencies": {
+    "SaveIt.InMemoryData": "1.0.0",
+    "SaveIt.Common": "1.0.0",
+    "SaveIt.IO": "1.0.0",
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "*"
+    },
+    "System.Runtime.Serialization.Primitives": "*",
+    "Newtonsoft.Json": "*"
+  },
+
+  "frameworks": {
+    "netcoreapp1.0": {}
+  },
+
+  "tooling": {
+    "defaultNamespace": "SaveItConsole"
+  }
+}
