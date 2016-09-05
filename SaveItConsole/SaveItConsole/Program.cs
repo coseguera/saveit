@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using SaveIt.Common;
+using SaveIt.InMemoryData;
 using SaveIt.IO;
 
 namespace SaveItConsole
@@ -15,30 +17,83 @@ namespace SaveItConsole
 
         public static void Main(string[] args)
         {
+            ISaveItService service = GetInMemoryService().Result;
+            PrintData(service).Wait();
+        }
+
+        private static string GetFilePath(string fileRelativePath)
+        {
+            string currentDirectory = Directory.GetCurrentDirectory();
+            string path = Path.Combine(currentDirectory, fileRelativePath);
+            return path;
+        }
+
+        private static async Task<ISaveItService> GetInMemoryService()
+        {
             string filePath = GetFilePath(entityFileRelativePath);
+            string inputFilePath = GetFilePath(inputFileRelativePath);
+            ISaveItService service = new SaveItInMemoryService();
+
             List<SaveItUser> users = SaveItReader.ReadUsers(filePath).ToList();
+            foreach(var user in users)
+            {
+                await service.Users.CreateAsync(user);
+            }
+
             List<Account> accounts = SaveItReader.ReadEntities<Account>(filePath).ToList();
+            foreach(var account in accounts)
+            {
+                await service.Accounts.CreateAsync(account);
+            }
+
             List<Category> categories = SaveItReader.ReadEntities<Category>(filePath).ToList();
+            foreach(var category in categories)
+            {
+                await service.Categories.CreateAsync(category);
+            }
+
             List<Person> people = SaveItReader.ReadEntities<Person>(filePath).ToList();
+            foreach(var person in people)
+            {
+                await service.People.CreateAsync(person);
+            }
 
-            Console.WriteLine("Users:");
-            Console.WriteLine(JsonConvert.SerializeObject(users, Formatting.Indented));
+            var usr = users.Single();
+            var ftc = accounts.Single(a => a.Name.Equals("ftc", StringComparison.OrdinalIgnoreCase));
+            var cat = categories.Single();
 
+            List<AccountTransaction> accountTransactions = SaveItReader.ReadInputFile(inputFilePath, usr, ftc, cat, people).ToList();
+            foreach(var accountTransaction in accountTransactions)
+            {
+                await service.AccountTransactions.CreateAsync(accountTransaction);
+            }
+            return service;
+        }
+
+        private static async Task PrintData(ISaveItService service)
+        {
+            var user = (await service.Users.GetAllAsync()).Single();
+            Console.WriteLine("User:");
+            Console.WriteLine(JsonConvert.SerializeObject(user, Formatting.Indented));
+
+            var accounts = await service.Accounts.GetAllAsync(user.Id);
             Console.WriteLine("Accounts:");
             Console.WriteLine(JsonConvert.SerializeObject(accounts, Formatting.Indented));
 
-            Console.WriteLine("Categories:");
-            Console.WriteLine(JsonConvert.SerializeObject(categories, Formatting.Indented));
+            var category = (await service.Categories.GetAllAsync(user.Id)).Single();
+            Console.WriteLine("Category:");
+            Console.WriteLine(JsonConvert.SerializeObject(category, Formatting.Indented));
 
+            var people = await service.People.GetAllAsync(user.Id);
             Console.WriteLine("People:");
             Console.WriteLine(JsonConvert.SerializeObject(people, Formatting.Indented));
 
-            SaveItUser user = users.Single();
-            Account ftc = accounts.Single(a => a.Name.Equals("ftc", StringComparison.OrdinalIgnoreCase));
-            Category category = categories.Single();
+            var accountTransactions = await service.AccountTransactions.GetAllAsync(user.Id);
 
-            string inputFilePath = GetFilePath(inputFileRelativePath);
-            List<AccountTransaction> accountTransactions = SaveItReader.ReadInputFile(inputFilePath, user, ftc, category, people).ToList();
+            var sampleTransaction = accountTransactions.Where(x => x.Transactions.Sum(t => t.Amount) > 0).First();
+
+            Console.WriteLine("Paychecks:");
+            Console.WriteLine(JsonConvert.SerializeObject(sampleTransaction, Formatting.Indented));
 
             // var transactions = accountTransactions.SelectMany(t => t.Transactions);
 
@@ -52,26 +107,6 @@ namespace SaveItConsole
 
             // Console.WriteLine("Totals by Person:");
             // Console.WriteLine(JsonConvert.SerializeObject(totalsByPerson, Formatting.Indented));
-
-            var paycheckTransactions = accountTransactions
-                .Where(x => x.Transactions.Sum(t => t.Amount) > 0)
-                // .Select(x => new
-                // {
-                //     Id = x.Id,
-                //     Date = x.Date,
-                //     BankDesc = x.BankDescription,
-                //     AccountId = x.AccountId,
-                //     Account = x.Account,
-                //     Concept = x.Transactions.First().Concept,
-                //     Total = x.Transactions.Sum(t => t.Amount),
-                //     transactions = x.Transactions,
-                // })
-                // .Where(s => !s.Concept.Equals("nomina", StringComparison.OrdinalIgnoreCase))
-                // .OrderBy(s => s.Date);
-                .First();
-
-            Console.WriteLine("Paychecks:");
-            Console.WriteLine(JsonConvert.SerializeObject(paycheckTransactions, Formatting.Indented));
         }
 
         public static void CreateEntityFile(string[] args)
@@ -106,13 +141,6 @@ namespace SaveItConsole
             }
 
             writer.Dispose();
-        }
-
-        private static string GetFilePath(string fileRelativePath)
-        {
-            string currentDirectory = Directory.GetCurrentDirectory();
-            string path = Path.Combine(currentDirectory, fileRelativePath);
-            return path;
         }
     }
 }
