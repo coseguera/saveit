@@ -1,0 +1,122 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "serverName": {
+            "type": "string",
+            "metadata": {
+                "description": "The sql server name"
+            }
+        },
+        "serverUserName": {
+            "type": "string",
+            "metadata": {
+                "description": "The sql server administrator login"
+            }
+        },
+        "serverUserPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The sql server administrator login password"
+            }
+        },
+        "dbName": {
+            "type": "string",
+            "metadata": {
+                "description": "The sql database name"
+            }
+        },
+        "dbCollation": {
+            "type": "string",
+            "defaultValue": "SQL_Latin1_General_CP1_CI_AS",
+            "metadata": {
+                "description": "The database collation for governing the proper use of characters."
+            }
+        },
+        "dbEdition": {
+            "type": "string",
+            "defaultValue": "Basic",
+            "allowedValues": [
+                "Basic",
+                "Standard",
+                "Premium"
+            ],
+            "metadata": {
+                "description": "The type of database to create."
+            }
+        },
+        "dbMaxSizeBytes": {
+            "type": "string",
+            "defaultValue": "1073741824",
+            "metadata": {
+                "description": "The maximum size, in bytes, for the database"
+            }
+        },
+        "dbRequestedServiceObjectiveName": {
+            "type": "string",
+            "defaultValue": "Basic",
+            "allowedValues": [
+                "Basic",
+                "S0",
+                "S1",
+                "S2",
+                "P1",
+                "P2",
+                "P3"
+            ],
+            "metadata": {
+                "description": "Describes the performance level for Edition"
+            }
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "apiVersion": "2014-04-01-preview",
+            "name": "[parameters('serverName')]",
+            "type": "Microsoft.Sql/servers",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "displayName": "[parameters('serverName')]"
+            },
+            "properties": {
+                "administratorLogin": "[parameters('serverUserName')]",
+                "administratorLoginPassword": "[parameters('serverUserPassword')]"
+            },
+            "resources": [
+                {
+                    "type": "databases",
+                    "name": "[parameters('dbName')]",
+                    "apiVersion": "2014-04-01-preview",
+                    "location": "[resourceGroup().location]",
+                    "tags": {
+                        "displayName": "[parameters('dbName')]"
+                    },
+                    "dependsOn": [
+                        "[concat('Microsoft.Sql/servers/', parameters('serverName'))]"
+                    ],
+                    "properties": {
+                        "collation": "[parameters('dbCollation')]",
+                        "edition": "[parameters('dbEdition')]",
+                        "maxSizeBytes": "[parameters('dbMaxSizeBytes')]",
+                        "requestedServiceObjectiveName": "[parameters('dbRequestedServiceObjectiveName')]"
+                    }
+                },
+                {
+                    "apiVersion": "2014-04-01-preview",
+                    "dependsOn": [
+                        "[concat('Microsoft.Sql/servers/', parameters('serverName'))]",
+                        "[concat('Microsoft.Sql/servers/', parameters('serverName'), '/databases/', parameters('dbName'))]"
+                    ],
+                    "location": "[resourceGroup().location]",
+                    "name": "AllowAllWindowsAzureIps",
+                    "properties": {
+                        "startIpAddress": "0.0.0.0",
+                        "endIpAddress": "0.0.0.0"
+                    },
+                    "type": "firewallrules"
+                }
+            ]
+        }
+    ]
+}
