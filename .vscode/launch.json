@@ -13,14 +13,15 @@
             "externalConsole": false
         },
         {
-            "name": ".NET Core Launch (web)",
+            "name": ".NET Core Docker Launch (web)",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build",
-            "program": "${workspaceRoot}/bin/Debug/<target-framework>/<project-name.dll>",
-            "args": [],
-            "cwd": "${workspaceRoot}",
-            "stopAtEntry": false,
+            "preLaunchTask": "composeForDebug",
+            "cwd": "/app",
+            "program": "/app/SaveIt.Web.dll",
+            "sourceFileMap": {
+                "/app": "${workspaceRoot}"
+            },
             "launchBrowser": {
                 "enabled": true,
                 "args": "${auto-detect-url}",
@@ -30,23 +31,18 @@
                 },
                 "osx": {
                     "command": "open"
-                },
-                "linux": {
-                    "command": "xdg-open"
                 }
             },
-            "env": {
-                "ASPNETCORE_ENVIRONMENT": "Development"
-            },
-            "sourceFileMap": {
-                "/Views": "${workspaceRoot}/Views"
+            "pipeTransport": {
+                "pipeProgram": "/bin/bash",
+                "pipeCwd": "${workspaceRoot}/SaveIt.Web/SaveIt.Web",
+                "pipeArgs": [ "-c", "./dockerTask.sh startDebugging" ],
+                "windows": {
+                    "pipeProgram": "${env.windir}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+                    "pipeCwd": "${workspaceRoot}",
+                    "pipeArgs": [ ".\\dockerTask.ps1", "-StartDebugging" ]
+                }
             }
-        },
-        {
-            "name": ".NET Core Attach",
-            "type": "coreclr",
-            "request": "attach",
-            "processId": "${command.pickProcess}"
         }
     ]
 }
