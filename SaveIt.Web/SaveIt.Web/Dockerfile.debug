@@ -1,6 +1,7 @@
-FROM microsoft/dotnet:1.0.0-preview2-sdk
+FROM microsoft/dotnet:latest
 ENV NUGET_XMLDOC_MODE skip
 ARG CLRDBG_VERSION=VS2015U2
+RUN apt-get update && apt-get -y install apt-utils sqlite3 libsqlite3-dev
 WORKDIR /clrdbg
 RUN curl -SL https://raw.githubusercontent.com/Microsoft/MIEngine/getclrdbg-release/scripts/GetClrDbg.sh --output GetClrDbg.sh \
     && chmod 700 GetClrDbg.sh \

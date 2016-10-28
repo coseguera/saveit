@@ -1,0 +1,17 @@
+{
+  "version": "1.0.0-*",
+  "buildOptions": {
+    "emitEntryPoint": false
+  },
+  "dependencies": {
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "*"
+    },
+    "Pomelo.EntityFrameworkCore.MySql": "1.0.0",
+    "SaveIt.Common": "1.0.0"
+  },
+  "frameworks": {
+    "netcoreapp1.0": {}
+  }
+}

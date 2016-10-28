@@ -1,12 +1,25 @@
 version: '2'
-
 services:
+  db:
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: P2ssw0rd
+      MYSQL_DATABASE: saveit
+      MYSQL_USER: saveit
+      MYSQL_ROOT_PASSWORD: P2ssw0rd
+
   saveit.web:
     image: saveit.web:debug
     build:
       context: .
       dockerfile: Dockerfile.debug
+    depends_on:
+      - db
+    links:
+      - db
     ports:
       - "5000:5000"
+    restart: always
     environment:
       - REMOTE_DEBUGGING
