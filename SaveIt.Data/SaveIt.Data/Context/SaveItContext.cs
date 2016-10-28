@@ -1,3 +1,4 @@
+using System;
 using Microsoft.EntityFrameworkCore;
 using SaveIt.Common;
 
@@ -18,5 +19,11 @@ namespace SaveIt.Data.Context
         public DbSet<Person> People { get; set; }
 
         public DbSet<AccountTransaction> AccountTransactions { get; set; }
+
+        public static Action<DbContextOptionsBuilder> UseMySql(string connectionString)
+        {
+            Action<DbContextOptionsBuilder> useMySql = o => o.UseMySql(connectionString);
+            return useMySql;
+        }
     }
 }

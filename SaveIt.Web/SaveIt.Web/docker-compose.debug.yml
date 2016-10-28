@@ -23,3 +23,4 @@ services:
     restart: always
     environment:
       - REMOTE_DEBUGGING
+      - ASPNET_ENV=Development
